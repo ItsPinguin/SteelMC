@@ -13,6 +13,7 @@ mod piston_moving;
 mod potent_sulfur;
 mod raw;
 mod sign;
+pub mod copper_golem_block_entity;
 
 pub use barrel::{BARREL_SLOTS, BarrelBlockEntity};
 pub use beehive::{

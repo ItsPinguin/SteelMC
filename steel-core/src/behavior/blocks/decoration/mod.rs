@@ -3,6 +3,7 @@ mod cake_block;
 mod candle_block;
 mod candle_cake_block;
 mod chain_block;
+mod copper_golem_statue_block;
 mod end_rod_block;
 mod jukebox_block;
 #[cfg(test)]
@@ -17,6 +18,7 @@ pub use cake_block::CakeBlock;
 pub use candle_block::CandleBlock;
 pub use candle_cake_block::CandleCakeBlock;
 pub use chain_block::{ChainBlock, WeatheringCopperChainBlock};
+pub use copper_golem_statue_block::CopperGolemStatueBlock;
 pub use end_rod_block::EndRodBlock;
 pub use jukebox_block::JukeboxBlock;
 pub use lantern_block::LanternBlock;

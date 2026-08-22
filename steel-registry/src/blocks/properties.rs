@@ -951,6 +951,17 @@ pub enum Pose {
     Star,
 }
 
+impl Pose {
+    pub const fn get_next_pose(&self) -> Self {
+        match &self {
+            Pose::Standing => Pose::Sitting,
+            Pose::Sitting => Pose::Running,
+            Pose::Running => Pose::Star,
+            Pose::Star => Pose::Standing,
+        }
+    }
+}
+
 impl PropertyEnum for Pose {
     fn as_str(&self) -> &str {
         match self {

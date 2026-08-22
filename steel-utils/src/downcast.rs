@@ -74,7 +74,7 @@ impl_steel_downcast_type!(f32, "steel:rust_primitive/f32");
 impl_steel_downcast_type!(crate::Identifier, "steel:value/identifier");
 impl_steel_downcast_type!(text_components::TextComponent, "steel:value/text_component");
 
-mod private {
+pub mod private {
     pub trait Sealed {}
 
     impl<T: super::DowncastType> Sealed for T {}
