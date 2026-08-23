@@ -5,6 +5,7 @@ mod beehive;
 mod brushable;
 mod chiseled_bookshelf;
 mod comparator;
+mod copper_golem;
 mod daylight_detector;
 mod end_gateway;
 mod end_portal;
@@ -13,7 +14,6 @@ mod piston_moving;
 mod potent_sulfur;
 mod raw;
 mod sign;
-pub mod copper_golem_block_entity;
 
 pub use barrel::{BARREL_SLOTS, BarrelBlockEntity};
 pub use beehive::{
@@ -22,6 +22,7 @@ pub use beehive::{
 pub use brushable::BrushableBlockEntity;
 pub use chiseled_bookshelf::{CHISELED_BOOKSHELF_SLOTS, ChiseledBookShelfBlockEntity};
 pub use comparator::ComparatorBlockEntity;
+pub use copper_golem::CopperGolemStatueBlockEntity;
 pub use daylight_detector::DaylightDetectorBlockEntity;
 pub use end_gateway::EndGatewayBlockEntity;
 pub use end_portal::EndPortalBlockEntity;

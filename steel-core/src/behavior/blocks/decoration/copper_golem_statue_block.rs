@@ -1,31 +1,27 @@
-use crate::behavior::blocks::WeatheringCopperDoorBlock;
 use crate::behavior::{
     BlockBehavior, BlockCollisionContext, BlockEntityCreation, BlockPlaceContext,
     InteractionResult, InventoryAccess,
 };
+use crate::block_entity::entities::CopperGolemStatueBlockEntity;
 use crate::entity::ai::path::PathComputationType;
 use crate::player::Player;
-use crate::world::{LevelReader, ScheduledTickAccess, World};
+use crate::world::{LevelReader, World};
 use std::sync::{Arc, Weak};
 use steel_macros::block_behavior;
 use steel_registry::blocks::BlockRef;
 use steel_registry::blocks::block_state_ext::BlockStateExt;
-use steel_registry::blocks::properties::{
-    BlockStateProperties, BoolProperty, EnumProperty, Pose, PropertyEnum,
-};
+use steel_registry::blocks::properties::{BlockStateProperties, BoolProperty, EnumProperty, Pose};
 use steel_registry::blocks::shapes::VoxelShape;
-use steel_registry::fluid::{FluidRef, FluidStateExt};
+use steel_registry::fluid::FluidStateExt;
 use steel_registry::item_stack::ItemStack;
 use steel_registry::items::item::BlockHitResult;
 use steel_registry::vanilla_block_tags::BlockTag;
-use steel_registry::vanilla_fluids::WATER;
 use steel_registry::vanilla_item_tags::ItemTag;
 use steel_registry::vanilla_items;
 use steel_utils::types::{InteractionHand, UpdateFlags};
-use steel_utils::{BlockLocalAabb, BlockPos, BlockStateId, Direction, Identifier};
-use steel_worldgen::noise::AquiferResult::Fluid;
+use steel_utils::{BlockLocalAabb, BlockPos, BlockStateId, Direction};
 
-/// Behaviour for copper golem statues
+/// Behavior for copper golem statues
 #[block_behavior]
 pub struct CopperGolemStatueBlock {
     block: BlockRef,
@@ -41,12 +37,13 @@ const SHAPE: VoxelShape = VoxelShape::from_boxes(SHAPE_BOXES);
 //const WEATHER_STATE: WeatherState = WeatherState::Unaffected;
 
 impl CopperGolemStatueBlock {
+    /// creates a waxed copper golem statue
     #[must_use]
     pub const fn new(block: BlockRef) -> Self {
         Self { block }
     }
 
-    fn update_pose(world: &Arc<World>, state: BlockStateId, pos: BlockPos, player: &Player) {
+    fn update_pose(world: &Arc<World>, state: BlockStateId, pos: BlockPos, _player: &Player) {
         world.set_block(
             pos,
             state.set_value(POSE, state.get_value(POSE).get_next_pose()),
@@ -65,14 +62,14 @@ impl BlockBehavior for CopperGolemStatueBlock {
         )
     }
 
-    fn get_collision_shape(
+    fn affect_neighbors_after_removal(
         &self,
         state: BlockStateId,
-        world: &dyn LevelReader,
+        world: &Arc<World>,
         pos: BlockPos,
-        context: BlockCollisionContext,
-    ) -> VoxelShape {
-        SHAPE
+        _moved_by_piston: bool,
+    ) {
+        world.update_neighbor_for_output_signal(pos, state.get_block())
     }
 
     fn use_item_on(
@@ -93,16 +90,44 @@ impl BlockBehavior for CopperGolemStatueBlock {
         InteractionResult::Success
     }
 
+    fn get_clone_item_stack(
+        &self,
+        _block: BlockRef,
+        _state: BlockStateId,
+        _include_data: bool,
+    ) -> Option<ItemStack> {
+        Some(
+            //todo copy pose & weathering state
+            ItemStack::new(&vanilla_items::WAXED_COPPER_GOLEM_STATUE),
+        )
+    }
+
     fn is_pathfindable(&self, state: BlockStateId, computation_type: PathComputationType) -> bool {
         computation_type == PathComputationType::Water && state.get_fluid_state().is_water()
     }
 
-    // todo implement CopperGolemStatueBlockEntity
-    //fn new_block_entity(&self, level: Weak<World>, pos: BlockPos, state: BlockStateId) -> BlockEntityCreation {
-    //    BlockEntityCreation::Created(Arc::new(CopperGolemStatueBlockEntity::new()))
-    //}
+    fn get_collision_shape(
+        &self,
+        _state: BlockStateId,
+        _world: &dyn LevelReader,
+        _pos: BlockPos,
+        _context: BlockCollisionContext,
+    ) -> VoxelShape {
+        SHAPE
+    }
 
-    fn should_keep_block_entity(&self, old_state: BlockStateId, new_state: BlockStateId) -> bool {
+    fn new_block_entity(
+        &self,
+        level: Weak<World>,
+        pos: BlockPos,
+        state: BlockStateId,
+    ) -> BlockEntityCreation {
+        BlockEntityCreation::Created(Arc::new(CopperGolemStatueBlockEntity::new(
+            level, pos, state,
+        )))
+    }
+
+    fn should_keep_block_entity(&self, old_state: BlockStateId, _new_state: BlockStateId) -> bool {
         old_state
             .get_block()
             .has_tag(&BlockTag::COPPER_GOLEM_STATUES)
@@ -125,29 +150,6 @@ impl BlockBehavior for CopperGolemStatueBlock {
             Pose::Running => 3,
             Pose::Star => 4,
         }
-    }
-
-    fn get_clone_item_stack(
-        &self,
-        _block: BlockRef,
-        state: BlockStateId,
-        _include_data: bool,
-    ) -> Option<ItemStack> {
-        Some(
-            //todo copy pose & weathering state
-            ItemStack::new(
-                &vanilla_items::WAXED_COPPER_GOLEM_STATUE)
-        )
-    }
-
-    fn affect_neighbors_after_removal(
-        &self,
-        state: BlockStateId,
-        world: &Arc<World>,
-        pos: BlockPos,
-        _moved_by_piston: bool,
-    ) {
-        world.update_neighbor_for_output_signal(pos, state.get_block())
     }
 
     //fn update_shape(
