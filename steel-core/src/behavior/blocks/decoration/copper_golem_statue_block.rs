@@ -1,3 +1,4 @@
+use crate::behavior::blocks::{WeatherState, WeatheringCopper};
 use crate::behavior::{
     BlockBehavior, BlockCollisionContext, BlockEntityCreation, BlockPlaceContext,
     InteractionResult, InventoryAccess,
@@ -6,18 +7,26 @@ use crate::block_entity::entities::CopperGolemStatueBlockEntity;
 use crate::entity::ai::path::PathComputationType;
 use crate::player::Player;
 use crate::world::{LevelReader, World};
+use std::collections::BTreeMap;
 use std::sync::{Arc, Weak};
+use scc::stack;
 use steel_macros::block_behavior;
 use steel_registry::blocks::BlockRef;
 use steel_registry::blocks::block_state_ext::BlockStateExt;
-use steel_registry::blocks::properties::{BlockStateProperties, BoolProperty, EnumProperty, Pose};
+use steel_registry::blocks::properties::{
+    BlockStateProperties, BoolProperty, EnumProperty, Pose, PropertyEnum,
+};
 use steel_registry::blocks::shapes::VoxelShape;
+use steel_registry::data_components::DataComponentType;
+use steel_registry::data_components::components::BlockItemStateProperties;
+use steel_registry::data_components::vanilla_components::BLOCK_STATE;
 use steel_registry::fluid::FluidStateExt;
 use steel_registry::item_stack::ItemStack;
 use steel_registry::items::item::BlockHitResult;
 use steel_registry::vanilla_block_tags::BlockTag;
 use steel_registry::vanilla_item_tags::ItemTag;
-use steel_registry::vanilla_items;
+use steel_registry::{REGISTRY, RegistryExt, vanilla_items};
+use steel_registry::items::ItemRef;
 use steel_utils::types::{InteractionHand, UpdateFlags};
 use steel_utils::{BlockLocalAabb, BlockPos, BlockStateId, Direction};
 
@@ -92,14 +101,20 @@ impl BlockBehavior for CopperGolemStatueBlock {
 
     fn get_clone_item_stack(
         &self,
-        _block: BlockRef,
-        _state: BlockStateId,
+        block: BlockRef,
+        state: BlockStateId,
         _include_data: bool,
     ) -> Option<ItemStack> {
-        Some(
-            //todo copy pose & weathering state
-            ItemStack::new(&vanilla_items::WAXED_COPPER_GOLEM_STATUE),
-        )
+        let pose: Pose = state.get_value(POSE);
+        let block_state = BlockItemStateProperties::new(BTreeMap::from([(
+            "copper_golem_pose".to_owned(),
+            pose.as_str().into(),
+        )]));
+
+        let stack = REGISTRY.items.by_block(block);
+        let mut item = ItemStack::new(stack);
+        item.set(BLOCK_STATE, block_state);
+        Some( item )
     }
 
     fn is_pathfindable(&self, state: BlockStateId, computation_type: PathComputationType) -> bool {
@@ -151,19 +166,106 @@ impl BlockBehavior for CopperGolemStatueBlock {
             Pose::Star => 4,
         }
     }
+}
 
-    //fn update_shape(
-    //    &self,
-    //    state: BlockStateId,
-    //    world: &dyn ScheduledTickAccess,
-    //    pos: BlockPos,
-    //    _direction: Direction,
-    //    _neighbor_pos: BlockPos,
-    //    _neighbor_state: BlockStateId,
-    //) -> BlockStateId {
-    //    if state.get_value(WATERLOGGED) {
-    //        return world.schedule_fluid_tick_default(pos, &WATER, &*WATER.tick_delay);
-    //    }
-    //    BlockBehavior::update_shape(state, world, pos, _direction, _neighbor_pos, _neighbor_state)
-    //}
+/// Behavior for weathering copper golem statues
+#[block_behavior]
+pub struct WeatheringCopperGolemStatueBlock {
+    copper_golem_statue_block: CopperGolemStatueBlock,
+    #[json_arg(r#enum = "WeatherState", json = "weathering_state")]
+    weathering: WeatheringCopper,
+}
+
+impl WeatheringCopperGolemStatueBlock {
+    /// creates a weathering (non waxed) copper golem statue
+    #[must_use]
+    pub const fn new(block: BlockRef, weather_state: WeatherState) -> Self {
+        Self {
+            copper_golem_statue_block: CopperGolemStatueBlock::new(block),
+            weathering: WeatheringCopper::new(weather_state),
+        }
+    }
+}
+
+impl BlockBehavior for WeatheringCopperGolemStatueBlock {
+    fn get_state_for_placement(&self, context: &BlockPlaceContext<'_>) -> Option<BlockStateId> {
+        self.copper_golem_statue_block
+            .get_state_for_placement(context)
+    }
+
+    fn affect_neighbors_after_removal(
+        &self,
+        state: BlockStateId,
+        world: &Arc<World>,
+        pos: BlockPos,
+        moved_by_piston: bool,
+    ) {
+        self.copper_golem_statue_block
+            .affect_neighbors_after_removal(state, world, pos, moved_by_piston);
+    }
+
+    fn use_item_on(
+        &self,
+        state: BlockStateId,
+        world: &Arc<World>,
+        pos: BlockPos,
+        player: &Player,
+        hand: InteractionHand,
+        hit_result: &BlockHitResult,
+        inv: &mut InventoryAccess,
+    ) -> InteractionResult {
+        //todo wax on/off feature
+        self.copper_golem_statue_block
+            .use_item_on(state, world, pos, player, hand, hit_result, inv)
+    }
+
+    fn get_clone_item_stack(
+        &self,
+        _block: BlockRef,
+        _state: BlockStateId,
+        _include_data: bool,
+    ) -> Option<ItemStack> {
+        Some(
+            //todo copy pose & weathering state
+            ItemStack::new(&vanilla_items::COPPER_GOLEM_STATUE),
+        )
+    }
+
+    fn is_pathfindable(&self, state: BlockStateId, computation_type: PathComputationType) -> bool {
+        self.copper_golem_statue_block
+            .is_pathfindable(state, computation_type)
+    }
+
+    fn get_collision_shape(
+        &self,
+        state: BlockStateId,
+        world: &dyn LevelReader,
+        pos: BlockPos,
+        context: BlockCollisionContext,
+    ) -> VoxelShape {
+        self.copper_golem_statue_block
+            .get_collision_shape(state, world, pos, context)
+    }
+
+    fn random_tick(&self, state: BlockStateId, world: &Arc<World>, pos: BlockPos) {
+        self.weathering.change_over_time(state, world, pos);
+    }
+
+    fn has_analog_output_signal(&self, state: BlockStateId) -> bool {
+        self.copper_golem_statue_block
+            .has_analog_output_signal(state)
+    }
+
+    // TODO weathering state + ticking
+
+    fn get_analog_output_signal(
+        &self,
+        state: BlockStateId,
+        world: &dyn LevelReader,
+        pos: BlockPos,
+        direction: Direction,
+    ) -> i32 {
+        self.copper_golem_statue_block
+            .get_analog_output_signal(state, world, pos, direction)
+    }
 }

@@ -11,7 +11,6 @@ mod jukebox_tests;
 mod lantern_block;
 mod sign_block;
 mod torch_block;
-mod weathering_copper_golem_statue_block;
 mod weathering_lantern_block;
 
 pub use banner_block::{BannerBlock, WallBannerBlock};
@@ -19,7 +18,7 @@ pub use cake_block::CakeBlock;
 pub use candle_block::CandleBlock;
 pub use candle_cake_block::CandleCakeBlock;
 pub use chain_block::{ChainBlock, WeatheringCopperChainBlock};
-pub use copper_golem_statue_block::CopperGolemStatueBlock;
+pub use copper_golem_statue_block::{CopperGolemStatueBlock, WeatheringCopperGolemStatueBlock};
 pub use end_rod_block::EndRodBlock;
 pub use jukebox_block::JukeboxBlock;
 pub use lantern_block::LanternBlock;
@@ -28,5 +27,4 @@ pub use sign_block::{
     is_facing_front_text,
 };
 pub use torch_block::{TorchBlock, WallTorchBlock};
-pub use weathering_copper_golem_statue_block::WeatheringCopperGolemStatueBlock;
 pub use weathering_lantern_block::WeatheringLanternBlock;
