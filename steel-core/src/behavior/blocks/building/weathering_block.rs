@@ -138,7 +138,9 @@ impl WeatheringCopper {
         }
     }
 
-    pub fn get_weathering_state(&self) -> WeatherState {
+    /// exposes the weather state field
+    #[must_use]
+    pub const fn get_weather_state(&self) -> WeatherState {
         self.weather_state
     }
 }

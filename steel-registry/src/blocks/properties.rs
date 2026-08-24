@@ -952,6 +952,7 @@ pub enum Pose {
 }
 
 impl Pose {
+    #[must_use]
     pub const fn get_next_pose(&self) -> Self {
         match &self {
             Pose::Standing => Pose::Sitting,

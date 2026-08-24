@@ -62,11 +62,10 @@ impl CopperGolemStatueBlock {
 impl BlockBehavior for CopperGolemStatueBlock {
     fn get_state_for_placement(&self, context: &BlockPlaceContext<'_>) -> Option<BlockStateId> {
         context.with_item(|item| {
-            let pose_str = &*item
+            let pose_str = item
                 .get(BLOCK_STATE)
                 .unwrap()
-                .get("copper_golem_pose")
-                .unwrap();
+                .get("copper_golem_pose").unwrap();
             let pose: Pose = match pose_str {
                 "sitting" => Pose::Sitting,
                 "running" => Pose::Running,
@@ -90,7 +89,7 @@ impl BlockBehavior for CopperGolemStatueBlock {
         pos: BlockPos,
         _moved_by_piston: bool,
     ) {
-        world.update_neighbor_for_output_signal(pos, state.get_block())
+        world.update_neighbor_for_output_signal(pos, state.get_block());
     }
 
     fn use_item_on(
@@ -234,7 +233,7 @@ impl BlockBehavior for WeatheringCopperGolemStatueBlock {
                     .use_item_on(state, world, pos, player, hand, hit_result, inv)
         }
 
-        if self.weathering.get_weathering_state() == WeatherState::Unaffected {
+        if self.weathering.get_weather_state() == WeatherState::Unaffected {
             // TODO: spawn entity
         }
         InteractionResult::Pass

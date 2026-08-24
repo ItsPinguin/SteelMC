@@ -1,10 +1,10 @@
-use std::sync::Weak;
+use std::sync::{Weak};
 use crate::block_entity::{BlockEntity, BlockEntityBase};
 use simdnbt::borrow::BaseNbtCompound as BorrowedNbtCompound;
 use simdnbt::owned::NbtCompound;
-use steel_registry::vanilla_block_entity_types;
+use steel_registry::{vanilla_block_entity_types};
 use steel_utils::{BlockPos, BlockStateId, DowncastType, DowncastTypeKey};
-use crate::world::World;
+use crate::world::{World};
 
 /// copper golem statue block entity
 pub struct CopperGolemStatueBlockEntity {
@@ -37,4 +37,8 @@ impl BlockEntity for CopperGolemStatueBlockEntity {
     fn get_update_tag(&self) -> Option<NbtCompound> {
         Some(NbtCompound::new())
     }
+
+    //todo spawn golem on remove/click:
+    // removeStatue(final BlockState state)
+    // initCopperGolem(final BlockState state, final CopperGolem copperGolem)
 }
