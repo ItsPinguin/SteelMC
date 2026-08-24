@@ -25,6 +25,7 @@ pub use jukebox_block::JukeboxBlock;
 pub use lantern_block::LanternBlock;
 pub use sign_block::{
     CeilingHangingSignBlock, StandingSignBlock, WallHangingSignBlock, WallSignBlock,
+    is_facing_front_text,
 };
 pub use torch_block::{TorchBlock, WallTorchBlock};
 pub use weathering_copper_golem_statue_block::WeatheringCopperGolemStatueBlock;

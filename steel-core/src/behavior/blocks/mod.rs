@@ -19,8 +19,8 @@ pub use building::{
     BuddingAmethystBlock, CampfireBlock, CauldronBlock, ComposterBlock, ConduitBlock, DoorBlock,
     DropExperienceBlock, FenceBlock, FenceGateBlock, GlazedTerracottaBlock, HayBlock,
     HeavyCoreBlock, HoneyBlock, IceBlock, IronBarsBlock, LadderBlock, LavaCauldronBlock,
-    LayeredCauldronBlock, MagmaBlock, MudBlock, PotentSulfurBlock, PowderSnowBlock,
-    RotatedPillarBlock, ScaffoldingBlock, SlabBlock, SlimeBlock, SnowLayerBlock, SpongeBlock,
+    LayeredCauldronBlock, MagmaBlock, MudBlock, NetherrackBlock, PotentSulfurBlock, PowderSnowBlock,
+    RotatedPillarBlock, ScaffoldingBlock, SlabBlock, SlimeBlock, SnowLayerBlock, SoulSandBlock, SpongeBlock,
     StairBlock, TrapDoorBlock, WallBlock, WaterloggedTransparentBlock, WeatherState,
     WeatheringCopper, WeatheringCopperBarsBlock, WeatheringCopperDoorBlock,
     WeatheringCopperFullBlock, WeatheringCopperGrateBlock, WeatheringCopperSlabBlock,
@@ -35,6 +35,7 @@ pub use decoration::{
     CopperGolemStatueBlock, EndRodBlock, JukeboxBlock, LanternBlock, StandingSignBlock, TorchBlock,
     WallBannerBlock, WallHangingSignBlock, WallSignBlock, WallTorchBlock,
     WeatheringCopperChainBlock, WeatheringCopperGolemStatueBlock, WeatheringLanternBlock,
+    is_facing_front_text
 };
 pub use falling::{ConcretePowderBlock, DragonEggBlock, FallingBlock, SandBlock};
 pub use fluid::{BubbleColumnBlock, LiquidBlock};
@@ -63,7 +64,7 @@ pub use vegetation::{
 };
 pub use vegetation::{
     BaseCoralFanBlock, BaseCoralPlantBlock, BaseCoralWallFanBlock, BigDripleafBlock,
-    BigDripleafStemBlock, BushBlock, CarpetBlock, CaveVinesBlock, CaveVinesPlantBlock,
+    BigDripleafStemBlock, BushBlock, CarpetBlock, CarvedPumpkinBlock, CaveVinesBlock, CaveVinesPlantBlock,
     ChorusFlowerBlock, ChorusPlantBlock, CoralFanBlock, CoralPlantBlock, CoralWallFanBlock,
     DirtPathBlock, DryVegetationBlock, EyeblossomBlock, EyeblossomType, FarmlandBlock,
     FireflyBushBlock, FlowerBedBlock, GlowLichenBlock, HangingMossBlock, HangingRootsBlock,
