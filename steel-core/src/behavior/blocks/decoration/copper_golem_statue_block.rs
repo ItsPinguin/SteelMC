@@ -9,15 +9,14 @@ use crate::player::Player;
 use crate::world::{LevelReader, World};
 use std::collections::BTreeMap;
 use std::sync::{Arc, Weak};
-use scc::stack;
 use steel_macros::block_behavior;
+use steel_registry::REGISTRY;
 use steel_registry::blocks::BlockRef;
 use steel_registry::blocks::block_state_ext::BlockStateExt;
 use steel_registry::blocks::properties::{
     BlockStateProperties, BoolProperty, EnumProperty, Pose, PropertyEnum,
 };
 use steel_registry::blocks::shapes::VoxelShape;
-use steel_registry::data_components::DataComponentType;
 use steel_registry::data_components::components::BlockItemStateProperties;
 use steel_registry::data_components::vanilla_components::BLOCK_STATE;
 use steel_registry::fluid::FluidStateExt;
@@ -25,8 +24,6 @@ use steel_registry::item_stack::ItemStack;
 use steel_registry::items::item::BlockHitResult;
 use steel_registry::vanilla_block_tags::BlockTag;
 use steel_registry::vanilla_item_tags::ItemTag;
-use steel_registry::{REGISTRY, RegistryExt, vanilla_items};
-use steel_registry::items::ItemRef;
 use steel_utils::types::{InteractionHand, UpdateFlags};
 use steel_utils::{BlockLocalAabb, BlockPos, BlockStateId, Direction};
 
@@ -63,12 +60,27 @@ impl CopperGolemStatueBlock {
 
 impl BlockBehavior for CopperGolemStatueBlock {
     fn get_state_for_placement(&self, context: &BlockPlaceContext<'_>) -> Option<BlockStateId> {
-        Some(
-            self.block
-                .default_state()
-                .set_value(WATERLOGGED, context.is_water_source())
-                .set_value(FACING, context.horizontal_direction().opposite()),
-        )
+        context.with_item(|item| {
+            let pose_str = &*item
+                .get(BLOCK_STATE)
+                .unwrap()
+                .get("copper_golem_pose")
+                .unwrap();
+            println!("{}", pose_str);
+            let pose: Pose = match pose_str {
+                "sitting" => Pose::Sitting,
+                "running" => Pose::Running,
+                "star" => Pose::Star,
+                _ => Pose::Standing,
+            };
+            Some(
+                self.block
+                    .default_state()
+                    .set_value(WATERLOGGED, context.is_water_source())
+                    .set_value(FACING, context.horizontal_direction().opposite())
+                    .set_value(POSE, pose),
+            )
+        })
     }
 
     fn affect_neighbors_after_removal(
@@ -114,7 +126,7 @@ impl BlockBehavior for CopperGolemStatueBlock {
         let stack = REGISTRY.items.by_block(block);
         let mut item = ItemStack::new(stack);
         item.set(BLOCK_STATE, block_state);
-        Some( item )
+        Some(item)
     }
 
     fn is_pathfindable(&self, state: BlockStateId, computation_type: PathComputationType) -> bool {
@@ -221,14 +233,12 @@ impl BlockBehavior for WeatheringCopperGolemStatueBlock {
 
     fn get_clone_item_stack(
         &self,
-        _block: BlockRef,
-        _state: BlockStateId,
-        _include_data: bool,
+        block: BlockRef,
+        state: BlockStateId,
+        include_data: bool,
     ) -> Option<ItemStack> {
-        Some(
-            //todo copy pose & weathering state
-            ItemStack::new(&vanilla_items::COPPER_GOLEM_STATUE),
-        )
+        self.copper_golem_statue_block
+            .get_clone_item_stack(block, state, include_data)
     }
 
     fn is_pathfindable(&self, state: BlockStateId, computation_type: PathComputationType) -> bool {
