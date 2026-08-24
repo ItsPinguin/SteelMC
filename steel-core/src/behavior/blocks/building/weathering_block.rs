@@ -137,6 +137,10 @@ impl WeatheringCopper {
             1.0
         }
     }
+
+    pub fn get_weathering_state(&self) -> WeatherState {
+        self.weather_state
+    }
 }
 
 /// Block behavior for `WeatheringCopperFullBlock`

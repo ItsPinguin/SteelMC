@@ -24,6 +24,7 @@ use steel_registry::item_stack::ItemStack;
 use steel_registry::items::item::BlockHitResult;
 use steel_registry::vanilla_block_tags::BlockTag;
 use steel_registry::vanilla_item_tags::ItemTag;
+use steel_registry::vanilla_items::HONEYCOMB;
 use steel_utils::types::{InteractionHand, UpdateFlags};
 use steel_utils::{BlockLocalAabb, BlockPos, BlockStateId, Direction};
 
@@ -66,7 +67,6 @@ impl BlockBehavior for CopperGolemStatueBlock {
                 .unwrap()
                 .get("copper_golem_pose")
                 .unwrap();
-            println!("{}", pose_str);
             let pose: Pose = match pose_str {
                 "sitting" => Pose::Sitting,
                 "running" => Pose::Running,
@@ -226,9 +226,18 @@ impl BlockBehavior for WeatheringCopperGolemStatueBlock {
         hit_result: &BlockHitResult,
         inv: &mut InventoryAccess,
     ) -> InteractionResult {
-        //todo wax on/off feature
-        self.copper_golem_statue_block
-            .use_item_on(state, world, pos, player, hand, hit_result, inv)
+        if inv.with_item(|item_stack| !item_stack.item.has_tag(&ItemTag::AXES)) {
+            if inv.with_item(|item_stack| { item_stack.item.key == HONEYCOMB.key }) {
+                return InteractionResult::Pass;
+            }
+            return self.copper_golem_statue_block
+                    .use_item_on(state, world, pos, player, hand, hit_result, inv)
+        }
+
+        if self.weathering.get_weathering_state() == WeatherState::Unaffected {
+            // TODO: spawn entity
+        }
+        InteractionResult::Pass
     }
 
     fn get_clone_item_stack(
